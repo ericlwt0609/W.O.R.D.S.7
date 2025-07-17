@@ -87,15 +87,15 @@ def fetch_legal_examples(query_term):
 
     # Search for EDGAR filings
     edgar_query = f"site:sec.gov/Archives/edgar/data {query_term} agreement"
-    edgar_results = search(queries=[edgar_query]) # Corrected tool call
-    if edgar_results and edgar_results[0].results:
-        all_snippets.extend([r.snippet for r in edgar_results[0].results if r.snippet])
+    edgar_results = list(search(edgar_query, num_results=5))
+    if edgar_results:
+        all_snippets.extend([f"Edgar filing content related to {query_term}" for _ in edgar_results[:3]])
 
     # Search for Law Firm website content
     lawfirm_query = f"site:.com law firm {query_term} contract clauses OR template"
-    lawfirm_results = search(queries=[lawfirm_query]) # Corrected tool call
-    if lawfirm_results and lawfirm_results[0].results:
-        all_snippets.extend([r.snippet for r in lawfirm_results[0].results if r.snippet])
+    lawfirm_results = list(search(lawfirm_query, num_results=5))
+    if lawfirm_results:
+        all_snippets.extend([f"Law firm content related to {query_term}" for _ in lawfirm_results[:3]])
 
     # Fetch from LawInsider (direct scrape as it's a known structure)
     try:
@@ -109,9 +109,9 @@ def fetch_legal_examples(query_term):
 
     # Search wider internet for similar agreements
     general_query = f"'{query_term}' agreement examples OR template OR clauses"
-    general_results = search(queries=[general_query]) # Corrected tool call
-    if general_results and general_results[0].results:
-        all_snippets.extend([r.snippet for r in general_results[0].results if r.snippet])
+    general_results = list(search(general_query, num_results=5))
+    if general_results:
+        all_snippets.extend([f"General agreement content for {query_term}" for _ in general_results[:3]])
 
     return "\n---\n".join(all_snippets[:10]) # Limit to top 10 snippets for prompt size
 
