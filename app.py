@@ -176,7 +176,7 @@ The Service Provider in this SoW refers to the external entity that is the {'ser
 
 {dependencies_guidance}
 
-Highlight all figures (numbers, percentages, currency amounts) by wrapping them in <span style='background-color: yellow; padding: 2px 4px; border-radius: 3px;'>[FIGURE: X]</span> tags to indicate they require independent validation. For example, a price of $10,000 should be <span style='background-color: yellow; padding: 2px 4px; border-radius: 3px;'>[FIGURE: $10,000]</span>.
+Highlight all figures (numbers, percentages, currency amounts) by wrapping them in <span style='background-color: yellow; padding: 2px 4px; border-radius: 3px;'>X</span> tags to indicate they require independent validation. For example, a price of $10,000 should be <span style='background-color: yellow; padding: 2px 4px; border-radius: 3px;'>$10,000</span>.
 
 The SoW should follow this exact structure:
 
