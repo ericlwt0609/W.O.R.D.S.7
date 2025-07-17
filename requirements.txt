@@ -6,4 +6,4 @@ requests
 beautifulsoup4
 openpyxl
 python-pptx
-google-search-python
+googlesearch-python
