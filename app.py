@@ -348,8 +348,12 @@ if 'generated_sow' in st.session_state and st.session_state.generated_sow:
                     additional_context=st.session_state.additional_context
                 )
                 st.session_state.generated_sow = refined_sow # Update the stored SoW for next iteration
+                
+                # Clear the feedback input for next iteration
+                if 'feedback_for_refinement' in st.session_state:
+                    del st.session_state.feedback_for_refinement
 
-                st.success("Scope of Work updated based on your refinement.")
+                st.success("Scope of Work updated based on your refinement. You can continue refining below.")
                 st.subheader("Refined Scope of Work")
                 st.markdown(refined_sow, unsafe_allow_html=True)
 
@@ -357,6 +361,9 @@ if 'generated_sow' in st.session_state and st.session_state.generated_sow:
                 docx_path = export_to_docx(refined_sow, "Refined_Scope_of_Work.docx")
                 with open(docx_path, "rb") as f:
                     st.download_button("Download Refined SoW as DOCX", f, file_name="Refined_Scope_of_Work.docx")
+                
+                # Force rerun to update the UI
+                st.rerun()
         else:
             st.warning("Please type a suggestion before clicking 'Apply Refinement'.")
 else:
