@@ -9,6 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 import re # For regex to highlight figures
 from googlesearch import search # This is the correct way to import the provided tool
+import difflib # For comparing text differences
 
 # Libraries for Excel and PowerPoint - ensure these are installed via pip
 try:
@@ -114,6 +115,31 @@ def fetch_legal_examples(query_term):
         all_snippets.extend([f"General agreement content for {query_term}" for _ in general_results[:3]])
 
     return "\n---\n".join(all_snippets[:10]) # Limit to top 10 snippets for prompt size
+
+# --- Text Comparison Function ---
+def highlight_differences(original_text, refined_text):
+    """
+    Compares original and refined text and returns HTML with highlighted changes.
+    """
+    original_lines = original_text.split('\n')
+    refined_lines = refined_text.split('\n')
+    
+    differ = difflib.unified_diff(original_lines, refined_lines, lineterm='')
+    
+    highlighted_refined = []
+    refined_idx = 0
+    
+    for line in difflib.ndiff(original_lines, refined_lines):
+        if line.startswith('  '):  # unchanged line
+            highlighted_refined.append(line[2:])
+        elif line.startswith('+ '):  # added/modified line
+            highlighted_line = f"<div style='background-color: #e8f5e8; border-left: 4px solid #4CAF50; padding: 8px; margin: 2px 0;'><strong>REFINED:</strong> {line[2:]}</div>"
+            highlighted_refined.append(highlighted_line)
+        elif line.startswith('- '):  # removed line (original)
+            highlighted_line = f"<div style='background-color: #fff2f2; border-left: 4px solid #f44336; padding: 8px; margin: 2px 0; text-decoration: line-through;'><strong>ORIGINAL:</strong> {line[2:]}</div>"
+            highlighted_refined.append(highlighted_line)
+    
+    return '\n'.join(highlighted_refined)
 
 # --- LLM Interaction Function ---
 def generate_sow(base_text, user_desc, role_preference, combined_examples, existing_sow=None, feedback=None, additional_context=""):
@@ -338,6 +364,9 @@ if 'generated_sow' in st.session_state and st.session_state.generated_sow:
     if st.button("Apply Refinement"):
         if feedback_input.strip():
             with st.spinner("Refining Scope of Work..."):
+                # Store the original SoW before refinement
+                original_sow = st.session_state.generated_sow
+                
                 refined_sow = generate_sow(
                     st.session_state.base_text,
                     st.session_state.user_desc,
@@ -348,22 +377,22 @@ if 'generated_sow' in st.session_state and st.session_state.generated_sow:
                     additional_context=st.session_state.additional_context
                 )
                 st.session_state.generated_sow = refined_sow # Update the stored SoW for next iteration
-                
-                # Clear the feedback input for next iteration
-                if 'feedback_for_refinement' in st.session_state:
-                    del st.session_state.feedback_for_refinement
 
                 st.success("Scope of Work updated based on your refinement. You can continue refining below.")
-                st.subheader("Refined Scope of Work")
+                
+                # Show highlighted differences
+                st.subheader("Refined Scope of Work with Changes Highlighted")
+                highlighted_content = highlight_differences(original_sow, refined_sow)
+                st.markdown(highlighted_content, unsafe_allow_html=True)
+                
+                # Also show clean refined version
+                st.subheader("Clean Refined Scope of Work")
                 st.markdown(refined_sow, unsafe_allow_html=True)
 
                 # Offer download for refined SoW
                 docx_path = export_to_docx(refined_sow, "Refined_Scope_of_Work.docx")
                 with open(docx_path, "rb") as f:
                     st.download_button("Download Refined SoW as DOCX", f, file_name="Refined_Scope_of_Work.docx")
-                
-                # Force rerun to update the UI
-                st.rerun()
         else:
             st.warning("Please type a suggestion before clicking 'Apply Refinement'.")
 else:
