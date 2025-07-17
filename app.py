@@ -120,14 +120,20 @@ def fetch_legal_examples(query_term):
 def highlight_differences(original_text, refined_text):
     """
     Compares original and refined text and returns HTML with highlighted changes.
+    Also cleans up figure highlighting to show only the values.
     """
+    # Clean up figure highlighting in both texts before comparison
+    def clean_figures(text):
+        # Remove [FIGURE: ] wrapper and keep only the value
+        return re.sub(r"<span style='[^']*'>\[FIGURE: ([^\]]+)\]</span>", r'<span style="background-color: yellow; padding: 2px 4px; border-radius: 3px;">\1</span>', text)
+    
+    original_text = clean_figures(original_text)
+    refined_text = clean_figures(refined_text)
+    
     original_lines = original_text.split('\n')
     refined_lines = refined_text.split('\n')
     
-    differ = difflib.unified_diff(original_lines, refined_lines, lineterm='')
-    
     highlighted_refined = []
-    refined_idx = 0
     
     for line in difflib.ndiff(original_lines, refined_lines):
         if line.startswith('  '):  # unchanged line
