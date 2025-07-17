@@ -125,7 +125,7 @@ def highlight_differences(original_text, refined_text):
     # Clean up figure highlighting in both texts before comparison
     def clean_figures(text):
         # Remove [FIGURE: ] wrapper and keep only the value
-        return re.sub(r"<span style='[^']*'>\[FIGURE: ([^\]]+)\]</span>", r'<span style="background-color: yellow; padding: 2px 4px; border-radius: 3px;">\1</span>', text)
+        return re.sub(r"<span style='background-color: yellow; padding: 2px 4px; border-radius: 3px;'>\[FIGURE: (.*?)\]</span>", r'<span style="background-color: yellow; padding: 2px 4px; border-radius: 3px;">\1</span>', text)
     
     original_text = clean_figures(original_text)
     refined_text = clean_figures(refined_text)
@@ -391,9 +391,11 @@ if 'generated_sow' in st.session_state and st.session_state.generated_sow:
                 highlighted_content = highlight_differences(original_sow, refined_sow)
                 st.markdown(highlighted_content, unsafe_allow_html=True)
                 
-                # Also show clean refined version
+                # Also show clean refined version with cleaned figures
                 st.subheader("Clean Refined Scope of Work")
-                st.markdown(refined_sow, unsafe_allow_html=True)
+                # Clean up figure highlighting for display
+                clean_refined_sow = re.sub(r"<span style='background-color: yellow; padding: 2px 4px; border-radius: 3px;'>\[FIGURE: (.*?)\]</span>", r'<span style="background-color: yellow; padding: 2px 4px; border-radius: 3px;">\1</span>', refined_sow)
+                st.markdown(clean_refined_sow, unsafe_allow_html=True)
 
                 # Offer download for refined SoW
                 docx_path = export_to_docx(refined_sow, "Refined_Scope_of_Work.docx")
