@@ -8,7 +8,7 @@ from docx import Document as DocxWriter
 import requests
 from bs4 import BeautifulSoup
 import re # For regex to highlight figures
-import Google Search # This is the correct way to import the provided tool
+from googlesearch import search # This is the correct way to import the provided tool
 
 # Libraries for Excel and PowerPoint - ensure these are installed via pip
 try:
